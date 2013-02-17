@@ -83,6 +83,35 @@ EOS
           }
         end
       end
+
+      describe '#read' do
+        let(:server) { Fluentd::Integration::Server.new(capture_output: true) }
+        let(:conf)    {
+          <<-EOS
+<source>
+  type forward
+  port #{server.port}
+</source>
+
+<match integration.test>
+  type stdout
+</match>
+EOS
+        }
+        let(:client) { Fluentd::Integration::Client.new(port: server.port) }
+
+        before {
+          server.conf = conf
+          server.start
+          client.post('integration.test', foo: 'bar')
+        }
+
+        it {
+          expect(
+            server.in.each_line.first =~ /integration\.test/
+          ).to be_true
+        }
+      end
     end
   end
 end

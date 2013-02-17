@@ -4,39 +4,54 @@ require "tempfile"
 module Fluentd
   module Integration
     class Server
-      attr_accessor :command, :fluentd, :conf, :conf_file
+      attr_accessor :command, :fluentd, :conf, :conf_file, :in, :out, :capture_output
 
       def initialize(args = {})
         @command = args[:command] || 'fluentd'
+        @capture_output = args[:capture_output]
+
+        if capture_output
+          self.in, self.out = IO.pipe
+        end
+
         @fluentd = Glint::Server.new do
           begin
-            exec command, '-c', conf_file.path
+            if capture_output
+              self.in.close
+              $stdout.reopen(out)
+            end
+
+            exec command, '-c', conf_file.path, '-q'
           rescue Errno::ENOENT => error
             STDERR.write(error.message)
           end
         end
+      end
 
-        def port
-          fluentd.port
+      def port
+        fluentd.port
+      end
+
+      def start
+        generate_conf_file
+        fluentd.start
+
+        if capture_output
+          out.close
+        end
+      end
+
+      def generate_conf_file
+        self.conf_file = Tempfile.new('fluentd-integration')
+
+        if conf.kind_of?(IO)
+          self.conf = conf.read
         end
 
-        def start
-          generate_conf_file
-          fluentd.start
-        end
-
-        def generate_conf_file
-          self.conf_file = Tempfile.new('fluentd-integration')
-
-          if conf.kind_of?(IO)
-            self.conf = conf.read
-          end
-
-          begin
-            conf_file.puts(conf)
-          ensure
-            conf_file.close
-          end
+        begin
+          conf_file.puts(conf)
+        ensure
+          conf_file.close
         end
       end
     end
