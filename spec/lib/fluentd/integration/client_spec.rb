@@ -12,7 +12,7 @@ module Fluentd
       end
 
       describe '#post' do
-        let(:server) { Fluentd::Integration::Server.new }
+        let(:server) { Fluentd::Integration::Server.new(capture_output: true) }
         let(:conf)    {
           <<-EOS
 <source>
