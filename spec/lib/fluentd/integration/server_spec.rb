@@ -1,4 +1,5 @@
 require_relative '../../../spec_helper'
+require 'tempfile'
 
 module Fluentd
   module Integration
@@ -31,6 +32,56 @@ EOS
             TCPSocket.open('127.0.0.1', server.port)
           }.to_not raise_error
         }
+      end
+
+      describe '#generate_conf_file' do
+        context 'when conf is a string' do
+          let(:server) { Fluentd::Integration::Server.new }
+          let(:conf)   {
+            <<-EOS
+<source>
+  type forward
+  port #{server.port}
+</source>
+EOS
+          }
+          before {
+            server.conf = conf
+            server.start
+          }
+
+          it {
+            expect {
+              TCPSocket.open('127.0.0.1', server.port)
+            }.to_not raise_error
+          }
+        end
+
+        context 'when conf is an IO object' do
+          let(:server) { Fluentd::Integration::Server.new }
+          let(:file)   { Tempfile.new('test') }
+          let(:conf)   {
+            conf = <<-EOS
+<source>
+  type forward
+  port #{server.port}
+</source>
+EOS
+            file.puts(conf)
+            file.close
+            File.open(file.path)
+          }
+          before {
+            server.conf = conf
+            server.start
+          }
+
+          it {
+            expect {
+              TCPSocket.open('127.0.0.1', server.port)
+            }.to_not raise_error
+          }
+        end
       end
     end
   end

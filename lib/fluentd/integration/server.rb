@@ -28,6 +28,10 @@ module Fluentd
         def generate_conf_file
           self.conf_file = Tempfile.new('fluentd-integration')
 
+          if conf.kind_of?(IO)
+            self.conf = conf.read
+          end
+
           begin
             conf_file.puts(conf)
           ensure
