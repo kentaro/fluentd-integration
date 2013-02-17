@@ -21,7 +21,7 @@ module Fluentd
               $stdout.reopen(out)
             end
 
-            exec command, '-c', conf_file.path, '-q'
+            exec command, '-c', conf_file.path, '-qq'
           rescue Errno::ENOENT => error
             STDERR.write(error.message)
           end
