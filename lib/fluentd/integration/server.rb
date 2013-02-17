@@ -42,7 +42,8 @@ module Fluentd
       end
 
       def generate_conf_file
-        self.conf_file = Tempfile.new('fluentd-integration')
+        # XXX
+        self.conf_file = Tempfile.new([rand**32, '.conf'])
 
         if conf.kind_of?(IO)
           self.conf = conf.read
