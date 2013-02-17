@@ -1,6 +1,6 @@
 # Fluentd::Integration [![BuildStatus](https://secure.travis-ci.org/kentaro/fluentd-integration.png)](http://travis-ci.org/kentaro/fluentd-integration)
 
-Fluentd::Integration provides some utilities that help you to test your configurations through whole the fluentd processes.
+Fluentd::Integration provides some utilities that help you to test your configurations through the whole fluentd processes.
 
 ## Usage
 
